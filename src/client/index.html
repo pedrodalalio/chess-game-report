@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Chess Game Report</h1>
-        <div class="container">
+    <h1>Chess Game Report</h1>
+    <div class="container">
+        <div id="game-list-container">
             <!-- Input Section -->
             <div class="input-section">
                 <select id="input-type">
@@ -24,9 +24,9 @@
                 <input type="text" id="game-input" placeholder="Insira aqui">
                 <button id="load-button">Carregar</button>
             </div>
+            <!-- Lista de Partidas -->
+            <div id="game-list"></div>
         </div>
-        <!-- Lista de Partidas -->
-        <div id="game-list"></div>
         <!-- Chessboard Container -->
         <div id="chessboard-container">
             <div id="board" style="width: 400px"></div>
