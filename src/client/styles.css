@@ -4,52 +4,66 @@ body {
     margin: 0;
     padding: 0;
 }
-
 h1 {
     margin-top: 20px;
 }
-
 .container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
+    margin: 20px 0;
     gap: 20px;
 }
-
 /* Input Section */
 .input-section {
     display: flex;
     align-items: center;
     gap: 10px;
 }
-
 input, select, button {
     padding: 10px;
     font-size: 16px;
 }
-
 button {
     cursor: pointer;
 }
-
-/* Chessboard Placeholder */
-#chessboard {
-    width: 500px;
-    height: 500px;
-    background-color: #eee;
+/* Chessboard Container */
+#chessboard-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
+    margin: 20px auto;
+    max-width: 600px;
 }
-
+#board {
+    margin-bottom: 10px;
+}
+#move-controls {
+    margin: 10px 0;
+}
+#move-list {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    max-width: 400px;
+}
+.move-button {
+    padding: 5px;
+    margin: 2px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+.move-button.current {
+    background-color: #007bff;
+    color: white;
+}
 /* Lista de Partidas */
 #game-list {
     margin-top: 20px;
 }
-
 .game-item {
     border: 1px solid #ddd;
     padding: 10px;
@@ -57,8 +71,14 @@ button {
     width: 60%;
     background-color: #f9f9f9;
 }
-
 .game-item button {
     margin-top: 5px;
     padding: 5px;
+}
+.winner {
+    color: green;
+    font-weight: bold;
+}
+.loser {
+    color: red;
 }

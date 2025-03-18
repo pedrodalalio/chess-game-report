@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess Game Report</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Bibliotecas necessárias -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
 </head>
 <body>
     <div id="app">
         <h1>Chess Game Report</h1>
-
         <div class="container">
             <!-- Input Section -->
             <div class="input-section">
@@ -18,23 +22,21 @@
                     <option value="chesscom">Chess.com Nickname</option>
                 </select>
                 <input type="text" id="game-input" placeholder="Insira aqui">
-                <button onclick="loadGame()">Carregar</button>
+                <button id="load-button">Carregar</button>
             </div>
         </div>
-
         <!-- Lista de Partidas -->
         <div id="game-list"></div>
-
-        <!-- Chessboard Placeholder -->
-        <div id="chessboard">
+        <!-- Chessboard Container -->
+        <div id="chessboard-container">
             <div id="board" style="width: 400px"></div>
-            <div>
-                <button onclick="prevMove()">⏮️ Anterior</button>
-                <button onclick="nextMove()">⏭️ Próximo</button>
+            <div id="move-controls">
+                <button id="prev-move">⏮️ Anterior</button>
+                <button id="next-move">⏭️ Próximo</button>
             </div>
+            <div id="move-list"></div>
         </div>
     </div>
-
-    <script type="module" src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
