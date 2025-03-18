@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess Game Report</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Bibliotecas necessárias -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
@@ -15,7 +14,6 @@
     <h1>Chess Game Report</h1>
     <div class="container">
         <div id="game-list-container">
-            <!-- Input Section -->
             <div class="input-section">
                 <select id="input-type">
                     <option value="pgn">PGN</option>
@@ -24,12 +22,10 @@
                 <input type="text" id="game-input" placeholder="Insira aqui">
                 <button id="load-button">Carregar</button>
             </div>
-            <!-- Lista de Partidas -->
             <div id="game-list"></div>
         </div>
-        <!-- Chessboard Container -->
         <div id="chessboard-container">
-            <div id="board" style="width: 400px"></div>
+            <div id="board"></div>
             <div id="move-controls">
                 <button id="prev-move">⏮️ Anterior</button>
                 <button id="next-move">⏭️ Próximo</button>

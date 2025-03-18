@@ -13,11 +13,11 @@ h1 {
 }
 .container {
     display: flex;
+    flex-wrap: wrap;
     height: 100vh;
     gap: 20px;
     padding: 20px;
 }
-/* Input Section */
 .input-section {
     text-align: center;
     padding: 10px;
@@ -54,14 +54,6 @@ h1 {
 .game-item:hover {
     background-color: #e3e3e3;
 }
-.winner {
-    color: green;
-    font-weight: bold;
-}
-.loser {
-    color: red;
-}
-/* Chessboard Container */
 #chessboard-container {
     flex: 2.3;
     display: flex;
@@ -71,6 +63,10 @@ h1 {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+#board {
+    width: 100%;
+    max-width: 400px;
 }
 #move-controls {
     margin-top: 10px;
@@ -86,4 +82,31 @@ button {
 }
 button:hover {
     background-color: #0056b3;
+}
+
+@media screen and (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+    #game-list-container, #chessboard-container {
+        flex: 1;
+        width: 100%;
+    }
+}
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    #board {
+        max-width: 300px;
+    }
+    .input-section select, .input-section input, .input-section button {
+        width: 100%;
+        font-size: 14px;
+    }
+    button {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
 }
