@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const gameListDiv = document.getElementById("game-list");
         gameListDiv.innerHTML = "<h2>Escolha uma partida:</h2>";
         
-        games.forEach((game, index) => {
+        games.reverse().forEach((game, index) => {
             const { white, black, url, pgn } = game;
             const isUserWhite = white.username.toLowerCase() === currentUser.toLowerCase();
             const isUserBlack = black.username.toLowerCase() === currentUser.toLowerCase();

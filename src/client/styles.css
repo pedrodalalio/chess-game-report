@@ -66,7 +66,7 @@ h1 {
 }
 #board {
     width: 100%;
-    max-width: 400px;
+    max-width: 550px;
 }
 #move-controls {
     margin-top: 10px;
