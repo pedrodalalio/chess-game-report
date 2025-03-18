@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game Report</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Chess Game Report</h1>
+
+        <div class="container">
+            <!-- Input Section -->
+            <div class="input-section">
+                <select id="input-type">
+                    <option value="pgn">PGN</option>
+                    <option value="chesscom">Chess.com Nickname</option>
+                </select>
+                <input type="text" id="game-input" placeholder="Insira aqui">
+                <button onclick="loadGame()">Carregar</button>
+            </div>
+        </div>
+
+        <!-- Lista de Partidas -->
+        <div id="game-list"></div>
+
+        <!-- Chessboard Placeholder -->
+        <div id="chessboard">
+            <div id="board" style="width: 400px"></div>
+            <div>
+                <button onclick="prevMove()">⏮️ Anterior</button>
+                <button onclick="nextMove()">⏭️ Próximo</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
