@@ -2,11 +2,15 @@ import express, { Request, Response } from "express";
 import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
+import { spawn } from "child_process"; // 🔹 Para rodar Stockfish
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isDev = process.env.NODE_ENV === "development";
+
+// 🔹 Caminho do executável do Stockfish
+const STOCKFISH_PATH = path.join(__dirname, "server", "bin", "stockfish.exe"); // 🛑 Ajuste se necessário
 
 // 🔹 Configurações globais para evitar cache
 app.use((req, res, next) => {
@@ -115,7 +119,42 @@ app.get("/chesscom-game", async (req: Request, res: Response) => {
     }
 });
 
-// 🔹 Iniciar o servidor com URL dinâmica
+// 🔹 Função para analisar um movimento usando Stockfish
+function analyzeMove(fen: string, callback: (analysis: string) => void) {
+    const engine = spawn(STOCKFISH_PATH);
+
+    let analysisResult = "";
+
+    engine.stdout.on("data", (data) => {
+        const message = data.toString();
+
+        if (message.includes("bestmove")) {
+            analysisResult = message;
+            engine.kill();
+            callback(analysisResult);
+        }
+    });
+
+    engine.stdin.write("uci\n");
+    engine.stdin.write(`position fen ${fen}\n`);
+    engine.stdin.write("go depth 15\n");
+}
+
+// 🔹 Rota para análise de jogadas usando Stockfish
+app.post("/analyze-move", async (req: Request, res: Response) => {
+    const { fen } = req.body;
+
+    if (!fen) {
+        res.status(400).json({ error: "FEN da posição é obrigatória" });
+        return 
+    }
+
+    analyzeMove(fen, (analysis) => {
+        res.json({ analysis });
+    });
+});
+
+// 🔹 Iniciar o servidor
 const baseURL = isDev ? `http://localhost:${PORT}` : process.env.PROD_URL || "https://seuservidor.com";
 app.listen(PORT, () => {
     console.log(`✅ Servidor rodando em ${baseURL}`);

@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Carregar um PGN diretamente
     function loadPgn(pgn) {
         game = new Chess();
         try {
@@ -48,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Buscar jogos do Chess.com
     async function fetchChessComGames(username) {
         try {
             const response = await fetch(`${API_BASE_URL}/chesscom-games?username=${username}`);
@@ -71,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Exibir lista de jogos
     function displayGameList(games, currentUser) {
         const gameListDiv = document.getElementById("game-list");
         gameListDiv.innerHTML = "<h2>Escolha uma partida:</h2>";
@@ -97,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const gameItem = document.createElement("div");
             gameItem.classList.add("game-item");
-            
+
             const gameButton = document.createElement("button");
             gameButton.textContent = "Visualizar detalhes";
             gameButton.addEventListener('click', () => selectGame(game));
@@ -115,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Selecionar um jogo para visualização
     function selectGame(selectedGame) {
         currentPgn = selectedGame.pgn;
         resetAndDisplayGame();
@@ -127,63 +123,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Inicializar o tabuleiro se ainda não estiver inicializado
     function initializeBoard() {
         if (!boardInitialized) {
             const boardElement = document.getElementById('board');
             if (boardElement) {
-                board = Chessboard('board', {
-                    draggable: false,
+            board = Chessboard('board', {
+                draggable: false,
                     position: 'start',
                     pieceTheme: './public/img/chesspieces/{piece}.svg'
-                });            
-                boardInitialized = true;
+            });            
+            boardInitialized = true;
             } else {
                 console.error("Elemento 'board' não encontrado!");
             }
         }
     }
 
-    // Reiniciar e exibir o jogo
     function resetAndDisplayGame() {
-        // Inicializar o tabuleiro se necessário
         initializeBoard();
-        
-        // Verificar se o tabuleiro foi inicializado com sucesso
         if (!board) {
             console.error("Tabuleiro não inicializado! Verifique se o elemento 'board' existe no HTML.");
             alert("Erro ao carregar o tabuleiro. Verifique o console para mais detalhes.");
             return;
         }
         
-        // Reiniciar o jogo
         game = new Chess();
         game.load_pgn(currentPgn);
-        
-        // Reiniciar a posição do tabuleiro
         board.position('start');
-        
-        // Obter os movimentos
         moves = game.history({ verbose: true });
         moveIndex = 0;
-        
-        // Reiniciar o jogo para a posição inicial
         game = new Chess();
-        
-        // Atualizar a lista de movimentos
         updateMoveList();
     }
 
-    // Atualizar a lista de movimentos
     function updateMoveList() {
         const moveListDiv = document.getElementById("move-list");
-        if (!moveListDiv) {
-            console.error("Elemento 'move-list' não encontrado!");
-            return;
-        }
-        
         moveListDiv.innerHTML = "";
-        
+
         const sanMoves = moves.map(move => move.san);
         
         sanMoves.forEach((san, index) => {
@@ -207,49 +183,76 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Ir para um movimento específico
     function goToMove(targetIndex) {
-        if (!board) {
-            console.error("Tabuleiro não inicializado!");
-            return;
-        }
-        
         game = new Chess();
-        
-        // Aplicar todos os movimentos até o índice alvo
         for (let i = 0; i < targetIndex; i++) {
             if (i < moves.length) {
-                game.move(moves[i]);
+            game.move(moves[i]);
             }
         }
         
         moveIndex = targetIndex;
         board.position(game.fen());
         updateMoveList();
+        analyzePreviousMove();
     }
 
-    // Avançar para o próximo movimento
-    function nextMove() {
-        if (!board) {
-            console.error("Tabuleiro não inicializado!");
-            return;
+    // 🔹 Função para analisar a jogada anterior com Stockfish
+    async function analyzePreviousMove() {
+        if (!game || moveIndex === 0) return;
+
+        let tempGame = new Chess();
+        for (let i = 0; i < moveIndex - 1; i++) {
+            tempGame.move(moves[i]);
         }
-        
+
+        const previousFEN = tempGame.fen();
+        const lastMove = moves[moveIndex - 1].san;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/analyze-move`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fen: previousFEN })
+            });
+
+            const data = await response.json();
+            if (data.analysis) {
+                compareMoveWithBest(data.analysis, lastMove);
+            }
+        } catch (error) {
+            console.error("Erro ao analisar a jogada anterior:", error);
+        }
+    }
+
+    function compareMoveWithBest(analysis, lastMove) {
+        const bestMoveDiv = document.getElementById("best-move");
+    
+        const bestMoveMatch = analysis.match(/bestmove\s(\w+)/);
+        let bestMove = bestMoveMatch ? bestMoveMatch[1] : "Desconhecido";
+        if (bestMove.length === 4) {
+            bestMove = bestMove.slice(2, 4);
+        }
+    
+        if (lastMove.replace("+", "").replace("#", "").toLowerCase() === bestMove) {
+            bestMoveDiv.innerHTML = `<strong>Última jogada:</strong> ${lastMove} ✅ (Melhor jogada!)`;
+        } else {
+            bestMoveDiv.innerHTML = `<strong>Última jogada:</strong> ${lastMove} ❌ | <strong>Melhor jogada:</strong> ${bestMove}`;
+        }
+    }
+    
+
+    function nextMove() {
         if (moveIndex < moves.length) {
             game.move(moves[moveIndex]);
             board.position(game.fen());
             moveIndex++;
             updateMoveList();
+            analyzePreviousMove();
         }
     }
 
-    // Retroceder para o movimento anterior
     function prevMove() {
-        if (!board) {
-            console.error("Tabuleiro não inicializado!");
-            return;
-        }
-        
         if (moveIndex > 0) {
             moveIndex--;
             game.undo();
