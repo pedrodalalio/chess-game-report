@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let moves = [];
     let currentPgn = '';
     let boardInitialized = false;
+    let moveAnalysisCache = {};
 
     document.getElementById('load-button').addEventListener('click', loadGame);
     document.getElementById('prev-move').addEventListener('click', prevMove);
@@ -182,18 +183,18 @@ document.addEventListener('DOMContentLoaded', function() {
     //     });
     // }
 
-    function goToMove(targetIndex) {
-        game = new Chess();
-        for (let i = 0; i < targetIndex; i++) {
-            if (i < moves.length) {
-            game.move(moves[i]);
-            }
-        }
+    // function goToMove(targetIndex) {
+    //     game = new Chess();
+    //     for (let i = 0; i < targetIndex; i++) {
+    //         if (i < moves.length) {
+    //         game.move(moves[i]);
+    //         }
+    //     }
         
-        moveIndex = targetIndex;
-        board.position(game.fen());
-        analyzePreviousMove();
-    }
+    //     moveIndex = targetIndex;
+    //     board.position(game.fen());
+    //     analyzePreviousMove();
+    // }
 
     // 🔹 Função para analisar a jogada anterior com Stockfish
     async function analyzePreviousMove() {
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const data = await response.json();
             if (data.analysis) {
+                moveAnalysisCache[moveIndex] = data.analysis; // 🔹 Armazena a análise no cache
                 compareMoveWithBest(data.analysis, lastMove);
             }
         } catch (error) {
@@ -254,6 +256,30 @@ document.addEventListener('DOMContentLoaded', function() {
             moveIndex--;
             game.undo();
             board.position(game.fen());
+            if (moveAnalysisCache[moveIndex]) {
+                displayCachedAnalysis(moveIndex);
+            }
         }
     }
+
+    function displayCachedAnalysis(index) {
+        const bestMoveDiv = document.getElementById("best-move");
+    
+        let analysis = moveAnalysisCache[index] || "";
+    
+        const bestMoveMatch = analysis.match(/bestmove\s(\w{2,4})/);
+        let bestMove = bestMoveMatch ? bestMoveMatch[1] : "Desconhecido";
+    
+        if (bestMove.length === 4) {
+            bestMove = bestMove.slice(2, 4);
+        }
+    
+        const lastMove = moves[index - 1] ? moves[index - 1].san : "Nenhuma jogada";
+    
+        if (lastMove.replace("+", "").replace("#", "").toLowerCase() === bestMove) {
+            bestMoveDiv.innerHTML = `<strong>Última jogada:</strong> ${lastMove} ✅ (Melhor jogada!)`;
+        } else {
+            bestMoveDiv.innerHTML = `<strong>Última jogada:</strong> ${lastMove} ❌ | <strong>Melhor jogada:</strong> ${bestMove}`;
+        }
+    }    
 });
