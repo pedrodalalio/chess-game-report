@@ -153,35 +153,34 @@ document.addEventListener('DOMContentLoaded', function() {
         moves = game.history({ verbose: true });
         moveIndex = 0;
         game = new Chess();
-        updateMoveList();
     }
 
-    function updateMoveList() {
-        const moveListDiv = document.getElementById("move-list");
-        moveListDiv.innerHTML = "";
+    // function updateMoveList() {
+    //     const moveListDiv = document.getElementById("move-list");
+    //     moveListDiv.innerHTML = "";
 
-        const sanMoves = moves.map(move => move.san);
+    //     const sanMoves = moves.map(move => move.san);
         
-        sanMoves.forEach((san, index) => {
-            // Adicionar número do movimento para movimentos brancos
-            if (index % 2 === 0) {
-                const moveNumber = Math.floor(index / 2) + 1;
-                const moveNumberSpan = document.createElement("span");
-                moveNumberSpan.textContent = `${moveNumber}. `;
-                moveListDiv.appendChild(moveNumberSpan);
-            }
+    //     sanMoves.forEach((san, index) => {
+    //         // Adicionar número do movimento para movimentos brancos
+    //         if (index % 2 === 0) {
+    //             const moveNumber = Math.floor(index / 2) + 1;
+    //             const moveNumberSpan = document.createElement("span");
+    //             moveNumberSpan.textContent = `${moveNumber}. `;
+    //             moveListDiv.appendChild(moveNumberSpan);
+    //         }
             
-            const moveButton = document.createElement("button");
-            moveButton.textContent = san;
-            moveButton.classList.add("move-button");
-            if (index === moveIndex - 1) {
-                moveButton.classList.add("current");
-            }
+    //         const moveButton = document.createElement("button");
+    //         moveButton.textContent = san;
+    //         moveButton.classList.add("move-button");
+    //         if (index === moveIndex - 1) {
+    //             moveButton.classList.add("current");
+    //         }
             
-            moveButton.addEventListener('click', () => goToMove(index + 1));
-            moveListDiv.appendChild(moveButton);
-        });
-    }
+    //         moveButton.addEventListener('click', () => goToMove(index + 1));
+    //         moveListDiv.appendChild(moveButton);
+    //     });
+    // }
 
     function goToMove(targetIndex) {
         game = new Chess();
@@ -193,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         moveIndex = targetIndex;
         board.position(game.fen());
-        updateMoveList();
         analyzePreviousMove();
     }
 
@@ -247,7 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
             game.move(moves[moveIndex]);
             board.position(game.fen());
             moveIndex++;
-            updateMoveList();
             analyzePreviousMove();
         }
     }
@@ -257,7 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
             moveIndex--;
             game.undo();
             board.position(game.fen());
-            updateMoveList();
         }
     }
 });
