@@ -1,0 +1,163 @@
+import { useEffect, useState } from "react";
+import { Chess } from "chess.js";
+import Chessboard from "chessboardjsx";
+
+export default function Home() {
+  const [game, setGame] = useState(new Chess());
+  const [moveIndex, setMoveIndex] = useState(0);
+  const [moves, setMoves] = useState<any[]>([]);
+  const [currentPgn, setCurrentPgn] = useState("");
+
+  const loadGame = async () => {
+    const type = (document.getElementById("input-type") as HTMLSelectElement).value;
+    const input = (document.getElementById("game-input") as HTMLInputElement).value;
+
+    if (!input) {
+      alert("Por favor, insira um nome de usuário ou PGN.");
+      return;
+    }
+
+    if (type === "chesscom") {
+      await fetchChessComGames(input);
+    } else {
+      try {
+        loadPgn(input);
+      } catch (e) {
+        alert("PGN inválido. Verifique o formato.");
+        console.error(e);
+      }
+    }
+  };
+
+  const loadPgn = (pgn: string) => {
+    const newGame = new Chess();
+    try {
+      newGame.loadPgn(pgn);
+      setGame(newGame);
+      setCurrentPgn(pgn);
+      setMoves(newGame.history({ verbose: true }));
+      setMoveIndex(0);
+    } catch (error) {
+      alert("Não foi possível carregar o PGN. Verifique o formato.");
+      console.error(error);
+    }
+  };
+
+  const fetchChessComGames = async (username: string) => {
+    try {
+      const response = await fetch(`/api/chesscom-games?username=${username}`);
+      const data = await response.json();
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      if (Array.isArray(data)) {
+        displayGameList(data, username);
+      } else {
+        console.error("Erro: resposta inesperada do servidor", data);
+        alert("Erro ao processar os dados das partidas.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar partidas do Chess.com:", error);
+      alert("Erro ao buscar partidas do Chess.com.");
+    }
+  };
+
+  const displayGameList = (games: any[], currentUser: string) => {
+    const gameListDiv = document.getElementById("game-list");
+    if (!gameListDiv) return;
+    gameListDiv.innerHTML = "<h2>Escolha uma partida:</h2>";
+
+    games.reverse().forEach((game) => {
+      const { white, black, pgn } = game;
+      const isUserWhite = white.username.toLowerCase() === currentUser.toLowerCase();
+      const isUserBlack = black.username.toLowerCase() === currentUser.toLowerCase();
+      const userWon = (isUserWhite && white.result === "win") || (isUserBlack && black.result === "win");
+      const userLost = (isUserWhite && black.result === "win") || (isUserBlack && white.result === "win");
+
+      const whiteClass = userWon && isUserWhite ? "winner" : userLost && isUserWhite ? "loser" : "";
+      const blackClass = userWon && isUserBlack ? "winner" : userLost && isUserBlack ? "loser" : "";
+
+      const gameItem = document.createElement("div");
+      gameItem.classList.add("game-item");
+
+      const gameButton = document.createElement("button");
+      gameButton.textContent = "Visualizar detalhes";
+      gameButton.addEventListener("click", () => selectGame(pgn));
+
+      gameItem.innerHTML = `
+        <p>
+          <span class="${whiteClass}">${white.username} (${white.rating})</span> vs
+          <span class="${blackClass}">${black.username} (${black.rating})</span>
+        </p>
+        <p>Resultado: ${white.result} - ${black.result}</p>
+      `;
+
+      gameItem.appendChild(gameButton);
+      gameListDiv.appendChild(gameItem);
+    });
+  };
+
+  const selectGame = (pgn: string) => {
+    setCurrentPgn(pgn);
+    loadPgn(pgn);
+    document.getElementById("chessboard-container")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const nextMove = () => {
+    if (moveIndex < moves.length) {
+      game.move(moves[moveIndex]);
+      setMoveIndex(moveIndex + 1);
+    }
+  };
+
+  const prevMove = () => {
+    if (moveIndex > 0) {
+      game.undo();
+      setMoveIndex(moveIndex - 1);
+    }
+  };
+
+  return (
+    <>
+      <h1 className="text-center p-5 bg-gray-800 text-white m-0 text-2xl font-bold">Chess Game Report</h1>
+      <div className="flex flex-wrap h-screen gap-5 p-5 md:flex-col md:h-auto">
+        <div id="game-list-container" className="flex-1.5 overflow-y-auto bg-white p-3 rounded-lg shadow-md w-full md:flex-1">
+          <div className="text-center p-3 bg-white rounded-lg shadow-md mb-3">
+            <select id="input-type" className="p-2 m-1 text-lg border rounded">
+              <option value="chesscom">Chess.com Nickname</option>
+            </select>
+            <input id="game-input" type="text" placeholder="Type here" className="p-2 m-1 text-lg border rounded w-full md:w-auto" />
+            <button onClick={loadGame} className="btn btn-neutral m-1">Carregar</button>
+          </div>
+          <div id="game-list" className="max-h-[70vh] overflow-y-auto"></div>
+        </div>
+        <div id="chessboard-container" className="flex-2.3 flex flex-col items-center bg-white p-5 rounded-lg shadow-md w-full md:flex-1">
+          <Chessboard
+            position={game.fen()}
+            onDrop={({ sourceSquare, targetSquare }) => {
+              const move = game.move({
+                from: sourceSquare,
+                to: targetSquare,
+                promotion: "q",
+              });
+
+              if (move) {
+                setGame(new Chess(game.fen()));
+                setMoves(game.history({ verbose: true }));
+              }
+            }}
+            width={550}
+            transitionDuration={300}
+          />
+          <div id="move-controls" className="mt-3">
+            <button onClick={prevMove} className="btn btn-neutral m-1">⏮️ Anterior</button>
+            <button onClick={nextMove} className="btn btn-neutral">⏭️ Próximo</button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
